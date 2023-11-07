@@ -57,6 +57,7 @@ app.post("/register", async (req, res) => {
         res.status(201).json(user)
 
 
+
     } catch (error) {
         console.log(error);
         res.status(500).send('Internal Server Error');
