@@ -5,6 +5,8 @@ const express = require('express')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const cookieParser = require('cookie-parser')
+const auth = require('./middleware/auth')
+auth
 
 const app = express()
 app.use(express.json())
@@ -100,7 +102,7 @@ app.post('/login', async (req, res) => {
     }
 })
 
-app.get("/dashboard", async (req, res) => {
+app.get("/dashboard",auth, (req, res) => {
 
     
     res.send('Welcome to dashboard')

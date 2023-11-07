@@ -10,9 +10,17 @@ const auth = (req, res) =>{
     }
 
     //decode that token and get id
-    const decode = jwt.verify(token, 'shhhh')
-    console.log(decode)
+        try {
+            const decode = jwt.verify(token, 'shhhh')
+            console.log(decode);
+            req.user = decode
+        } catch (error) {
+            console.log(error);
+            res.status(401).send('Invalid Token')
+        }
     //query to DB for that user id
+
+    return next()
 }
 
 module.exports = auth
