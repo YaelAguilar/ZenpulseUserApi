@@ -4,13 +4,15 @@ const User = require('./model/user')
 const express = require('express')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const cors = require('cors')
 const cookieParser = require('cookie-parser')
 const auth = require('./middleware/auth')
-auth
 
 const app = express()
 app.use(express.json())
 app.use(cookieParser())
+
+app.use(cors())
 
 
 app.get("/", (req, res) => {
@@ -57,6 +59,7 @@ app.post("/register", async (req, res) => {
 
     } catch (error) {
         console.log(error);
+        res.status(500).send('Internal Server Error');
     }
 })
 
@@ -99,6 +102,7 @@ app.post('/login', async (req, res) => {
 
     } catch (error) {
         console.log(error);
+        res.status(500).send('Internal Server Error');
     }
 })
 
