@@ -66,46 +66,49 @@ app.post("/register", async (req, res) => {
 
 app.post('/login', async (req, res) => {
     try {
-        //get all data from frontend
-        const {email, password} = req.body
-        //validation
+        // Obtener todos los datos del frontend
+        const { email, password } = req.body;
+        
+        // Validación
         if (!(email && password)) {
-            res.status(400).send('send all data')
+            return res.status(400).send('Envía todos los datos necesarios');
         }
-        //find user in DB
-        const user = await User.findOne({email})
-        //assignmennt if user is not there, then what ?
-
-        //match the password
-        if (user && (await bcrypt.compare(password, user.password))) {
-            const token = jwt.sign(
-                {id: user._id},
-                'shhhh', //process.env.jwtsecret
-                {
-                    expiresIn: "1h"
-                }
-            );
-            user.token = token
-            user.password = undefined
-
-            //cookie section
-            const options = {
-                expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-                httpOnly: true
-            };
-            res.status(200).cookie("token", token, options).json({
-                success: true,
-                token,
-                user
-            })
+        
+        // Buscar al usuario en la base de datos
+        const user = await User.findOne({ email });
+        
+        // Verificar si el usuario no existe
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).send('Credenciales inválidas');
         }
+        
+        const token = jwt.sign(
+            { id: user._id },
+            'shhhh', // Deberías usar process.env.jwtsecret en producción
+            {
+                expiresIn: '1h'
+            }
+        );
+        
+        user.token = token;
+        user.password = undefined;
 
-
+        const options = {
+            expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+            httpOnly: true
+        };
+        
+        return res.status(200).cookie('token', token, options).json({
+            success: true,
+            token,
+            user
+        });
     } catch (error) {
         console.log(error);
-        res.status(500).send('Internal Server Error');
+        return res.status(500).send('Error interno del servidor');
     }
-})
+});
+
 
 app.get("/dashboard",auth, (req, res) => {
 
