@@ -30,7 +30,7 @@ app.post("/register", async (req, res) => {
         //check if user already exists - email
         const existingUser = await User.findOne({ email })
         if (existingUser){
-            res.status(401).send('User already exists with tihs email')
+            return res.status(401).send('User already exists with tihs email')
         }
         
         //encrypt the password
