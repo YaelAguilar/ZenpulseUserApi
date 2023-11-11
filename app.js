@@ -27,7 +27,7 @@ app.post("/register", async (req, res) => {
         // Validar que todos los campos sean obligatorios
         if (!(firstname && lastname && email && password)) {
             //return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-            return res.status(400).send('Todos los campos son obligatorio11s');
+            return res.status(400).send('Todos los campos son obligatorios');
         }
 
         // Verificar si el usuario ya existe - email
