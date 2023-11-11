@@ -21,67 +21,70 @@ app.get("/", (req, res) => {
 
 app.post("/register", async (req, res) => {
     try {
-        //get all data from body
-        const {firstname, lastname, email, password} = req.body 
-        //all the data should exists
-        if (!(firstname && lastname && email && password)){
-            res.status(400).send('All fields are compulsory')
+        // Obtener todos los datos del cuerpo
+        const { firstname, lastname, email, password } = req.body;
+
+        // Validar que todos los campos sean obligatorios
+        if (!(firstname && lastname && email && password)) {
+            //return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+            return res.status(400).send('Todos los campos son obligatorio11s');
         }
-        //check if user already exists - email
-        const existingUser = await User.findOne({ email })
-        if (existingUser){
-            return res.status(401).send('User already exists with tihs email')
+
+        // Verificar si el usuario ya existe - email
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(401).send('Ya existe un usuario con este correo electrónico');
+            //return res.status(400).send('Ya existe un usuario con este correo electrónico');
         }
-        
-        //encrypt the password
-        const myEncpassword = await bcrypt.hash(password, 10)
-        //save the user in DB
+
+        // Encriptar la contraseña
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Guardar el usuario en la base de datos
         const user = await User.create({
             firstname,
             lastname,
             email,
-            password: myEncpassword
-        })
-        //generate a token for user and send it
+            password: hashedPassword
+        });
+
+        // Generar un token para el usuario y enviarlo
         const token = jwt.sign(
-            {id: user._id, email},
-            'shhhh', //process.env.jwtsecret
+            { id: user._id, email },
+            'shhhh', // Deberías usar process.env.jwtsecret en producción
             {
                 expiresIn: "1h"
             }
         );
-        user.token = token
-        user.password = undefined
+        user.token = token;
+        user.password = undefined;
 
-
-        res.status(201).json(user)
-
-
-
+        res.status(201).json(user);
     } catch (error) {
         console.log(error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).send('Error interno del servidor: ${error.message}');
     }
-})
+});
 
 app.post('/login', async (req, res) => {
     try {
         // Obtener todos los datos del frontend
         const { email, password } = req.body;
-        
+
         // Validación
         if (!(email && password)) {
             return res.status(400).send('Envía todos los datos necesarios');
         }
-        
+
         // Buscar al usuario en la base de datos
         const user = await User.findOne({ email });
-        
-        // Verificar si el usuario no existe
+
+        // Verificar si el usuario no existe o las credenciales son inválidas
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(401).send('Credenciales inválidas');
         }
-        
+
+        // Generar un token y configurar las cookies
         const token = jwt.sign(
             { id: user._id },
             'shhhh', // Deberías usar process.env.jwtsecret en producción
@@ -89,7 +92,7 @@ app.post('/login', async (req, res) => {
                 expiresIn: '1h'
             }
         );
-        
+
         user.token = token;
         user.password = undefined;
 
@@ -97,20 +100,21 @@ app.post('/login', async (req, res) => {
             expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
             httpOnly: true
         };
-        
-        return res.status(200).cookie('token', token, options).json({
+
+        res.cookie('token', token, options);
+        res.status(200).json({
             success: true,
             token,
             user
         });
     } catch (error) {
         console.log(error);
-        return res.status(500).send('Error interno del servidor');
+        res.status(500).send('Error interno del servidor');
     }
 });
 
 
-app.get("/dashboard",auth, (req, res) => {
+app.get("/dashbo",auth, (req, res) => {
 
     console.log(req.user);
     res.send('Welcome to dashboard')
